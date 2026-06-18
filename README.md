@@ -61,7 +61,6 @@ It can detect common project issues, navigate directly to problematic items, and
 
 Project Auditor includes a built-in update system.
 
-*
 
 ## Installation
 
@@ -76,9 +75,6 @@ Project Auditor uses GitHub-hosted version checking.
 
 When a new version is available, the panel will notify the user and allow updating directly from within After Effects.
 
-## License
-
-MIT License
 
 ## Installation
 
