@@ -62,13 +62,6 @@ It can detect common project issues, navigate directly to problematic items, and
 Project Auditor includes a built-in update system.
 
 
-## Installation
-
-1. Download the latest release.
-2. Install the CEP extension.
-3. Launch After Effects.
-4. Open **Project Auditor** from the Extensions menu.
-
 ## Versioning
 
 Project Auditor uses GitHub-hosted version checking.
@@ -134,8 +127,7 @@ When a new version is available, the panel will notify the user and allow updati
 
 7. Open **Window → Extensions → Project Auditor**. If the extension is installed correctly, the panel will appear and be ready to use.
 
-## Versioning
 
-Project Auditor uses GitHub-hosted version checking.
+##License
 
 For user purpose only, made by Nam Dinh
