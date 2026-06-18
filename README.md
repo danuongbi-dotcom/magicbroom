@@ -1,4 +1,5 @@
-<img width="622" height="593" alt="image" src="https://github.com/user-attachments/assets/6c0c170e-7612-42a7-85ab-141b90a6e324" />
+<img width="622" height="592" alt="image" src="https://github.com/user-attachments/assets/1239dfbd-e2c6-4a4f-8ca7-ca77e0afdf1c" />
+
 
 # Project Auditor
 
