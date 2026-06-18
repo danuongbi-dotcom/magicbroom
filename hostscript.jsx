@@ -84,7 +84,7 @@ function findCompsWithSpaces() {
         for (var i = 1; i <= app.project.numItems; i++) {
             var item = app.project.item(i);
             if (item instanceof CompItem && item.name.indexOf(" ") !== -1) {
-                out.push({ compIndex: i, label: item.name, status: "so pay" });
+                out.push({ compIndex: i, label: item.name, status: "SPACE" });
             }
         }
     } catch (e) {
