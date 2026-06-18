@@ -1,0 +1,5 @@
+{
+  "version": "1.0.1",
+  "jsxUrl": "https://raw.githubusercontent.com/yourname/yourrepo/main/dist/hostscript.jsx",
+  "notes": "Example entry — host this file (not the extension folder) somewhere public, e.g. a GitHub raw URL, and point VERSION_CHECK_URL in js/main.js at it."
+}
