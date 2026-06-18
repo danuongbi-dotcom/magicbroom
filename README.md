@@ -128,6 +128,6 @@ When a new version is available, the panel will notify the user and allow updati
 7. Open **Window → Extensions → Project Auditor**. If the extension is installed correctly, the panel will appear and be ready to use.
 
 
-##License
+## License
 
 For user purpose only, made by Nam Dinh
