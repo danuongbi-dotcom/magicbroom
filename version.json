@@ -1,5 +1,5 @@
 {
   "version": "1.0.2",
-  "jsxUrl": "https://github.com/danuongbi-dotcom/magicbroom/blob/cb02adbe7e22331e7e9fa814727eb446a3b24015/hostscript.jsx",
+  "jsxUrl": "https://github.com/danuongbi-dotcom/magicbroom/blob/8174021bb1b516ef7e0cad515ac66e617846c088/hostscript.jsx",
   "notes": "Example entry — host this file (not the extension folder) somewhere public, e.g. a GitHub raw URL, and point VERSION_CHECK_URL in js/main.js at it."
 }
