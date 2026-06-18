@@ -72,7 +72,7 @@ When a new version is available, the panel will notify the user and allow updati
 
 ## Installation
 
-1. Download the latest release.
+1. Download the project-auditor.rar.
 
 2. Extract the extension folder if the release is provided as a ZIP file.
 
