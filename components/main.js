@@ -9,7 +9,7 @@ const https = require('https');
 // Once an update lands (jsx and/or UI files), the real "current version"
 // comes from LOCAL_VERSION_PATH below, since the updater can now patch
 // every file in the extension, not just hostscript.jsx.
-const PANEL_VERSION = '2.0.1';
+const PANEL_VERSION = '2.0.3';
 
 // The installed package version is tracked separately, since it CAN
 // change in-place via the updater. We persist it to a small local JSON
