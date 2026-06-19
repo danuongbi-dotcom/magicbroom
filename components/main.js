@@ -9,7 +9,7 @@ const https = require('https');
 // Once an update lands (jsx and/or UI files), the real "current version"
 // comes from LOCAL_VERSION_PATH below, since the updater can now patch
 // every file in the extension, not just hostscript.jsx.
-const PANEL_VERSION = '2.0.3';
+const PANEL_VERSION = '2.0.4';
 
 // The installed package version is tracked separately, since it CAN
 // change in-place via the updater. We persist it to a small local JSON
@@ -383,22 +383,20 @@ const greetings = [
   "Hôm nay render nhanh, deadline xa - hoàn hảo! 🎬",
   "Cà phê đã sẵn sàng? Bắt đầu thôi! ☕",
   "Mọi layer đều ổn, mọi thứ đều đẹp. Tin tưởng vào bản thân! ✨",
-  "Chao buoi sang! Hom nay audit se sach bong 🧹",
-  "Khong co hidden layer nao thoat khoi tam mat ban! 🔍",
-  "Project hom nay chac chan se xuat sac 🚀",
-  "Bat dau mot ngay moi — khong co effect nao bi bo sot! 💪",
-  "Lam viec cham chi, ve som, ngu ngon. Let's go! 🌟",
-  "Moi frame deu quan trong. Ban dang lam tot lam! 🎞️",
-  "Render xong roi, an mot mieng banh nao! 🍰",
-  "Hom nay co the la ngay khong co bug. Cu hy vong! 🤞",
-  "Project sach, tam tri sach, sang tao bay cao! 🧠",
-  "Keyframe dung cho, deadline cung dung lo! ⏱️",
-  "Mot ngay moi, mot co hoi de project hoan hao hon! 🌈",
-  "Coffee + After Effects = cong thuc thanh cong ☕🎬",
-  "Ban da kiem tra het roi, gio la luc nghi ngoi 5 phut 😌",
-  "Khong co gi sai ca, chi la chua toi uc thoi 😄",
-  "Chuc ban render nhanh, export gon, khach hang vui! 📦",
-  "Hom nay la ngay tot de don dep project cu! 🗂️",
+  "Xin chào! Chúng ta sẽ làm gì hôm nay nào🧹",
+  "Không có hidden layer nào thoát khỏi tầm mắt bạn!🔍",
+  "Project hôm nay chắc chắn sẽ xuất sắc 🚀",
+  "Bắt đầu một ngày mới - không có effect nào bị bỏ sót! 💪",
+  "Làm việc chăm chỉ, về sớm, ngủ ngon. Let's go! 🌟",
+  "Mọi frame đều quan trọng. Bạn đang làm tốt lắm! 🎞️",
+  "Trước khi mình đi ngủ, ăn một quả táo tàu, cho vợ đỡ càu nhàu",
+  "Hôm nay có thể là ngày không có bug. Cứ hy vọng! 🤞",
+  "Project sạch, tâm trí sạch, sáng tạo bay cao! 🧠",
+  "Keyframe đúng chỗ, deadline cũng đừng lo! ⏱️",
+  "Một ngày mới, một cơ hội để project hoàn hảo hơn! 🌈",
+  "Coffee + After Effects = Công thức thành công ☕🎬",
+  "Không có gì sai cả, chỉ là chưa tới lúc thôi 😄",
+  "Chúc bạn render nhanh, export gọn, khách hàng vui! 📦",
   "Một đội quân sư tử được một con nai dẫn dắt sẽ không bao giờ là đội quân sư tử - Napoleon Bonaparte",
   "Có thể tiến chậm, nhưng đừng bao giờ bước lùi - Abraham Lincoln",
   "Tôi không phải là quá thông minh, chỉ là tôi nghiên cứu vấn đề lâu hơn thôi - Albert Einstein",
