@@ -423,7 +423,7 @@ function render() {
     resultTable.style.display = 'none';
     greetingEl.style.display = 'block';
     greetingEl.textContent = '⚠ ' + lastError;
-    counterLabel.textContent = 'Total items: 0  |  Double-click to jump to item';
+    counterLabel.textContent = 'Total items: 0  |  Double-click to jump to item | Hold Ctrl/Shift to select multiple items';
     return;
   }
 
