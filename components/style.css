@@ -74,8 +74,8 @@ h2 {
 button {
   background: #444;
   color: #eee;
-  border: 1px solid #555;
-  border-radius: 3px;
+  border: 0px solid #555;
+  border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
   font-size: 12px;
