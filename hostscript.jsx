@@ -215,7 +215,119 @@ function searchEffectsByName(searchStr, includeLocked) {
     return JSON.stringify(out);
 }
 
-/* ---------------- Navigation ---------------- */
+function findDuplicateCompNames() {
+    var out = [];
+    try {
+        var byName = {}; // lowercased name -> array of comp indices
+
+        for (var i = 1; i <= app.project.numItems; i++) {
+            var item = app.project.item(i);
+            if (item instanceof CompItem) {
+                var key = item.name.toLowerCase();
+                if (!byName[key]) byName[key] = [];
+                byName[key].push(i);
+            }
+        }
+
+        for (var nameKey in byName) {
+            var indices = byName[nameKey];
+            if (indices.length > 1) {
+                for (var k = 0; k < indices.length; k++) {
+                    var compIdx = indices[k];
+                    var comp = app.project.item(compIdx);
+                    out.push({
+                        compIndex: compIdx,
+                        label: comp.name,
+                        status: "DUPLICATE (" + indices.length + ")"
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        return JSON.stringify({ error: e.toString() });
+    }
+    return JSON.stringify(out);
+}
+
+/* ---------------- CM: merge 2 selected comps/footage ---------------- */
+// Ported from the standalone "Comparsion Comp.jsx" ScriptUI panel: takes
+// whatever 2 items are currently selected in the Project Panel, lays them
+// side-by-side in a new comp sized to fit both, and opens it. Returns "ok"
+// on success or a user-facing message string on failure (mirrors the alert()
+// calls in the original script, since this engine can't show its own UI alerts
+// reliably from a CEP-triggered call).
+function mergeTwoComps() {
+    var result = "ok";
+
+    app.beginUndoGroup("Create Comp");
+
+    try {
+        var sel = app.project.selection;
+
+        if (sel.length !== 2) {
+            return "Please select exactly 2 items in the Project Panel.";
+        }
+
+        var items = [sel[0], sel[1]];
+
+        items.sort(function (a, b) {
+            var aName = a.name.toLowerCase();
+            var bName = b.name.toLowerCase();
+            if (aName < bName) return -1;
+            if (aName > bName) return 1;
+            return 0;
+        });
+
+        var itemA = items[0];
+        var itemB = items[1];
+
+        if (
+            !(itemA instanceof CompItem || itemA instanceof FootageItem) ||
+            !(itemB instanceof CompItem || itemB instanceof FootageItem)
+        ) {
+            return "Please select compositions or footage items.";
+        }
+
+        var baseName = itemB.name.replace(/\.[^\.]+$/, "");
+        var compName = baseName + "_cm";
+
+        var compWidth = itemA.width + itemB.width;
+        var compHeight = Math.max(itemA.height, itemB.height);
+        var duration = Math.max(itemA.duration, itemB.duration);
+
+        var fps = 30;
+        if (itemB instanceof CompItem) {
+            fps = itemB.frameRate;
+        } else if (itemA instanceof CompItem) {
+            fps = itemA.frameRate;
+        }
+
+        var comp = app.project.items.addComp(
+            compName,
+            Math.round(compWidth),
+            Math.round(compHeight),
+            1,
+            duration,
+            fps
+        );
+
+        var layerA = comp.layers.add(itemA);
+        var layerB = comp.layers.add(itemB);
+
+        layerA.startTime = 0;
+        layerB.startTime = 0;
+
+        layerA.position.setValue([itemA.width / 2, compHeight / 2]);
+        layerB.position.setValue([itemA.width + (itemB.width / 2), compHeight / 2]);
+
+        comp.openInViewer();
+    } catch (err) {
+        result = "Error:\n\n" + err.toString();
+    }
+
+    app.endUndoGroup();
+    return result;
+}
 
 function navigateToItem(mode, refJson) {
     try {
@@ -223,7 +335,7 @@ function navigateToItem(mode, refJson) {
         var comp = app.project.item(ref.compIndex);
         if (!(comp instanceof CompItem)) return "Comp no longer exists.";
 
-        if (mode === "space") {
+        if (mode === "space" || mode === "dupeNames") {
             comp.openInViewer();
             return "ok";
         }
@@ -308,7 +420,7 @@ function deleteSelected(mode, refsJson) {
                     } catch (e) {}
                 }
             }
-        } else if (mode === "space") {
+        } else if (mode === "space" || mode === "dupeNames") {
             for (var r3 = 0; r3 < refs.length; r3++) {
                 try {
                     app.project.item(refs[r3].compIndex).remove();
