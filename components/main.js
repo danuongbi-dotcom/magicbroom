@@ -16,7 +16,7 @@ const PANEL_VERSION = '1.0.0';
 // file (next to hostscript.jsx) so the displayed version survives panel
 // reloads and reflects whatever code is actually running right now,
 // instead of being hardcoded and going stale the moment an update lands.
-const VERSION_CHECK_URL = 'https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/main/version.json';
+const VERSION_CHECK_URL = 'https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/version.json';
 
 // getSystemPath('extension') returns a file:// URI (e.g.
 // "file:///C:/Users/Admin/.../project-auditor-cep" on Windows, or
