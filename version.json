@@ -1,6 +1,6 @@
 {
-  "version": "2.0.3",
-  "notes": "Remove the outline of the buttons to make the UI cleaner",
+  "version": "2.0.4",
+  "notes": "Fix some bugs",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
