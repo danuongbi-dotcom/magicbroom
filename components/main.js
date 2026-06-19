@@ -398,7 +398,12 @@ const greetings = [
   "Ban da kiem tra het roi, gio la luc nghi ngoi 5 phut 😌",
   "Khong co gi sai ca, chi la chua toi uc thoi 😄",
   "Chuc ban render nhanh, export gon, khach hang vui! 📦",
-  "Hom nay la ngay tot de don dep project cu! 🗂️"
+  "Hom nay la ngay tot de don dep project cu! 🗂️",
+  "Một đội quân sư tử được một con nai dẫn dắt sẽ không bao giờ là đội quân sư tử - Napoleon Bonaparte",
+  "Có thể tiến chậm, nhưng đừng bao giờ bước lùi - Abraham Lincoln",
+  "Tôi không phải là quá thông minh, chỉ là tôi nghiên cứu vấn đề lâu hơn thôi - Albert Einstein",
+  "Nói hay và hùng hồn là một nghệ thuật, nhưng biết lúc nào cần ngừng lời cũng là một nghệ thuật chẳng kém hơn - Wolfgang Amadeus Mozart",
+  "Dù chỉ nắm vững một kiến thức nào đó, cũng đều có ích cho trí óc, nó sẽ ném đi những thứ vô dụng nhưng giữ lại những thứ có ích - Leonardo da Vinci",
 ];
 
 /* ---------------- DOM refs ---------------- */
