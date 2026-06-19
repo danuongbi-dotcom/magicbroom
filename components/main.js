@@ -379,10 +379,10 @@ let hasSearched = false;      // distinguishes "never run a search yet" from "ra
 let lastError = null;         // set when a search call throws; shown instead of the greeting
 
 const greetings = [
-  "Xin chao! Chuc mot ngay lam viec vui ve ☀️",
-  "Hom nay render nhanh, deadline xa — hoan hao! 🎬",
-  "Ca phe da san sang? Bat dau thoi! ☕",
-  "Moi layer deu on, moi thu deu dep. Tin tuong vao ban than! ✨",
+  "Xin chào! Chúc một ngày làm việc vui vẻ ☀️",
+  "Hôm nay render nhanh, deadline xa - hoàn hảo! 🎬",
+  "Cà phê đã sẵn sàng? Bắt đầu thôi! ☕",
+  "Mọi layer đều ổn, mọi thứ đều đẹp. Tin tưởng vào bản thân! ✨",
   "Chao buoi sang! Hom nay audit se sach bong 🧹",
   "Khong co hidden layer nao thoat khoi tam mat ban! 🔍",
   "Project hom nay chac chan se xuat sac 🚀",
@@ -399,6 +399,7 @@ const greetings = [
   "Khong co gi sai ca, chi la chua toi uc thoi 😄",
   "Chuc ban render nhanh, export gon, khach hang vui! 📦",
   "Hom nay la ngay tot de don dep project cu! 🗂️"
+  "Nhà triết học lỗi lạc Socrates nổi tiếng với câu nói đầy trí tuệ: Nếu bạn không có được những gì mình muốn, bạn phải khó chịu; nếu bạn có được những gì bạn không muốn bạn cũng khó chịu; ngay cả khi bạn có được những gì mình muốn thì vẫn khó chịu vì không thể giữ được mãi mãi. Tâm trí của bạn là vật cản lớn nhất. Nó muốn một cuộc sống tự do, không có sự thay đổi, không có sự đau đớn, và cũng không có cái chết. Nhưng sự thay đổi là một điều luật và không có sự giả dối nào có thể thay đổi thực tế đó"
 ];
 
 /* ---------------- DOM refs ---------------- */
@@ -428,7 +429,7 @@ function render() {
     resultTable.style.display = 'none';
     greetingEl.style.display = 'block';
     greetingEl.textContent = hasSearched
-      ? 'No items found for this check 🎉'
+      ? greetings[Math.floor(Math.random() * greetings.length)];
       : greetings[Math.floor(Math.random() * greetings.length)];
     counterLabel.textContent = 'Total items: 0  |  Double-click to jump to item';
     return;
