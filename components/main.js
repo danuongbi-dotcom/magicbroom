@@ -399,7 +399,6 @@ const greetings = [
   "Khong co gi sai ca, chi la chua toi uc thoi 😄",
   "Chuc ban render nhanh, export gon, khach hang vui! 📦",
   "Hom nay la ngay tot de don dep project cu! 🗂️"
-  "Nhà triết học lỗi lạc Socrates nổi tiếng với câu nói đầy trí tuệ: Nếu bạn không có được những gì mình muốn, bạn phải khó chịu; nếu bạn có được những gì bạn không muốn bạn cũng khó chịu; ngay cả khi bạn có được những gì mình muốn thì vẫn khó chịu vì không thể giữ được mãi mãi. Tâm trí của bạn là vật cản lớn nhất. Nó muốn một cuộc sống tự do, không có sự thay đổi, không có sự đau đớn, và cũng không có cái chết. Nhưng sự thay đổi là một điều luật và không có sự giả dối nào có thể thay đổi thực tế đó"
 ];
 
 /* ---------------- DOM refs ---------------- */
