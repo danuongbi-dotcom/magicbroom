@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2",
-  "notes": "Adds CM merge button, fixes duplicate-name detec.\n Tôi bị ngu, hãy cho tôi rác",
+  "version": "2.0.2",
+  "notes": "Style update, more tips",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
