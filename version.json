@@ -1,6 +1,6 @@
 {
-  "version": "2.0.5",
-  "notes": "Add some quotes",
+  "version": "2.0.6",
+  "notes": "Tất cả câu nói ngẫu nhiên được viết có dấu",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
