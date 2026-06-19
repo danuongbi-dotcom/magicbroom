@@ -428,7 +428,7 @@ function render() {
     resultTable.style.display = 'none';
     greetingEl.style.display = 'block';
     greetingEl.textContent = hasSearched
-      ? greetings[Math.floor(Math.random() * greetings.length)];
+      ? 'No items found for this check 🎉'
       : greetings[Math.floor(Math.random() * greetings.length)];
     counterLabel.textContent = 'Total items: 0  |  Double-click to jump to item';
     return;
