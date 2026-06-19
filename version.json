@@ -1,5 +1,10 @@
 {
-  "version": "2.0.3",
-  "jsxUrl": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/main/hostscript.jsx",
-  "notes": "Thêm nút CM"
+  "version": "1.0.1",
+  "notes": "Adds CM merge button, fixes duplicate-name detection.",
+  "files": {
+    "jsx": "https://raw.githubusercontent.com/you/repo/main/dist/hostscript.jsx",
+    "mainJs": "https://raw.githubusercontent.com/you/repo/main/dist/main.js",
+    "html": "https://raw.githubusercontent.com/you/repo/main/dist/index.html",
+    "css": "https://raw.githubusercontent.com/you/repo/main/dist/style.css"
+  }
 }
