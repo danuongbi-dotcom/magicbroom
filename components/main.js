@@ -433,7 +433,7 @@ function render() {
     greetingEl.textContent = hasSearched
       ? 'No items found for this check 🎉'
       : greetings[Math.floor(Math.random() * greetings.length)];
-    counterLabel.textContent = 'Total items: 0  |  Double-click to jump to item';
+    counterLabel.textContent = 'Total items: 0  |  Double-click to jump to item | Hold Ctrl/Shift to select multiple items';
     return;
   }
 
@@ -462,7 +462,7 @@ function render() {
     resultBody.appendChild(tr);
   });
 
-  counterLabel.textContent = `Total items: ${currentResults.length}  |  Double-click to jump to item`;
+  counterLabel.textContent = `Total items: ${currentResults.length}  |  Double-click to jump to item | Hold Ctrl/Shift to select multiple items`;
 }
 
 function onRowClick(e, idx) {
