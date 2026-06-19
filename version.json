@@ -1,6 +1,6 @@
 {
-  "version": "2.0.4",
-  "notes": "Fix some bugs",
+  "version": "2.0.5",
+  "notes": "Add some quotes",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
