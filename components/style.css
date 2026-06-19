@@ -225,12 +225,12 @@ button:hover {
 
 .action-cm {
   width: 100%;
-  background: rgb(108, 56, 184);
+  background: #000000;
   color: #fff;
 }
 
 .action-cm:hover {
-  background: rgb(126, 70, 206);
+  background: #333333;
 }
 
 .status-text {
