@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "2.1.0",
   "notes": "Thêm chức năng roll back sau update",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
