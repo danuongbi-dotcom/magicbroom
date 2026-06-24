@@ -1,6 +1,6 @@
 {
-  "version": "2.0.7",
-  "notes": "Thêm note hướng dẫn chọn item",
+  "version": "3.0.0",
+  "notes": "Thêm chức năng roll back sau update",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
