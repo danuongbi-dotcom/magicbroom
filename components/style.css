@@ -247,4 +247,23 @@ button:hover {
   font-size: 10px;
   color: #666;
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rollback-btn {
+  background: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.rollback-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #eee;
 }
