@@ -65,6 +65,14 @@ const STYLE_CSS_PATH = path.join(EXTENSION_ROOT, 'css', 'style.css');
 // Lives next to hostscript.jsx so it travels with the extension and
 // survives panel reloads/AE restarts.
 const LOCAL_VERSION_PATH = path.join(EXTENSION_ROOT, 'jsx', 'jsx-version.json');
+// Folder holding a snapshot of every file as it was immediately before the
+// most recently applied update, named after the version it would restore.
+// Lets the user undo a single update without needing network access again.
+// Only ever holds ONE prior version's worth of files (not a full history) —
+// whenever a new update is applied, this folder is wiped and recreated, so
+// rolling back doesn't itself create another rollback point, and an older
+// backup never lingers once a newer update has landed on top of it.
+const BACKUP_DIR = path.join(EXTENSION_ROOT, 'jsx', 'backup');
 
 function readInstalledPackageVersion() {
   try {
@@ -87,6 +95,79 @@ function writeInstalledPackageVersion(version) {
     console.error('[Project Auditor] Could not persist installed package version:', e);
     return false;
   }
+}
+
+// BACKUP_DIR always contains either nothing, or exactly one subfolder named
+// after the version it would restore (e.g. backup/2.0.4/). That subfolder
+// holds plain copies of whichever real files were overwritten, using their
+// normal basenames (hostscript.jsx, main.js, index.html, style.css) — so the
+// backup itself is just inspectable/openable like any other set of files,
+// not an opaque blob.
+function findBackupVersionDir() {
+  try {
+    const entries = fs.readdirSync(BACKUP_DIR, { withFileTypes: true })
+      .filter((e) => e.isDirectory());
+    if (entries.length === 0) {
+      console.log('[Project Auditor] BACKUP_DIR exists but has no version subfolders:', BACKUP_DIR);
+      return null;
+    }
+    // Only one should ever exist, since writeBackup() always clears this
+    // folder before writing a new one — but if anything odd left more than
+    // one behind, treat the most recently modified as the real backup.
+    const dirs = entries.map((e) => path.join(BACKUP_DIR, e.name));
+    dirs.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+    return { version: path.basename(dirs[0]), dir: dirs[0] };
+  } catch (e) {
+    console.log('[Project Auditor] No backup dir found at', BACKUP_DIR, '(' + e.code + ')');
+    return null; // BACKUP_DIR doesn't exist yet — nothing to roll back to.
+  }
+}
+
+// Returns { version, dir, files: { key: absolutePathInBackup } } for
+// whichever known files (jsx/mainJs/html/css) are actually present in the
+// backup folder, or null if there's no backup at all.
+function readBackup() {
+  const found = findBackupVersionDir();
+  if (!found) return null;
+  const files = {};
+  Object.keys(UPDATE_FILE_TARGETS).forEach((key) => {
+    const candidate = path.join(found.dir, path.basename(UPDATE_FILE_TARGETS[key]));
+    if (fs.existsSync(candidate)) files[key] = candidate;
+  });
+  console.log('[Project Auditor] readBackup() found version dir', found.dir, 'with files:', files);
+  if (Object.keys(files).length === 0) {
+    console.log('[Project Auditor] Backup folder exists but contained none of the expected filenames (hostscript.jsx/main.js/index.html/style.css).');
+    return null;
+  }
+  return { version: found.version, dir: found.dir, files: files };
+}
+
+// Snapshots whichever files are about to be overwritten, plus the version
+// we'd be rolling back to, BEFORE any of the new files are written. Always
+// wipes any existing backup folder first, so applying update N+1 discards
+// the backup for update N — only the most recent prior version is ever kept.
+// If this fails we still let the update proceed (a missing rollback point is
+// much less bad than blocking an update over it), but we log it loudly.
+function writeBackup(previousVersion, keys) {
+  try {
+    clearBackup();
+    const versionDir = path.join(BACKUP_DIR, previousVersion);
+    fs.mkdirSync(versionDir, { recursive: true });
+    keys.forEach((key) => {
+      const srcPath = UPDATE_FILE_TARGETS[key];
+      if (!fs.existsSync(srcPath)) return; // nothing to snapshot for this key
+      const destPath = path.join(versionDir, path.basename(srcPath));
+      fs.copyFileSync(srcPath, destPath);
+    });
+    return true;
+  } catch (e) {
+    console.error('[Project Auditor] Could not write rollback backup:', e);
+    return false;
+  }
+}
+
+function clearBackup() {
+  try { fs.rmSync(BACKUP_DIR, { recursive: true, force: true }); } catch (e) {}
 }
 
 console.log('[Project Auditor] EXTENSION_ROOT:', EXTENSION_ROOT);
@@ -155,6 +236,17 @@ function httpsGetFollowingRedirects(url, onSuccess, onError, redirectsLeft) {
   req.setTimeout(15000, () => {
     req.destroy(new Error('Request timed out after 15s: ' + url));
   });
+}
+
+// Plain window.location.reload() can be served from Chromium's disk cache
+// inside CEP, which means the panel can come back up still running the OLD
+// index.html/main.js even though the new files are already correctly on
+// disk — exactly the kind of mismatch that would make a brand new UI
+// element (like the rollback button) silently fail to appear after an
+// update. Appending a cache-busting query param forces a real re-fetch.
+function reloadPanel() {
+  const base = window.location.href.split('?')[0];
+  window.location.href = base + '?_pa=' + Date.now();
 }
 
 function checkForUpdate() {
@@ -280,6 +372,12 @@ function downloadUpdate(info) {
   }
 
   function writeAllAndApply() {
+    // Snapshot exactly the files this update is about to touch, plus the
+    // version we'd be rolling back to, so "Roll back" can undo this specific
+    // update later. Done before any file is overwritten.
+    const previousVersion = installedPackageVersion || PANEL_VERSION;
+    writeBackup(previousVersion, keys);
+
     // Write every file first. If any single write fails, we stop — we'd
     // rather leave the old files in place than end up with a half-updated,
     // mismatched set of jsx/main.js/html/css.
@@ -324,7 +422,7 @@ function downloadUpdate(info) {
         // already the new version — the reload will pick everything up,
         // including the jsx, in one consistent pass.
         statusEl.textContent = `Updated to v${info.version}. Reloading panel…`;
-        setTimeout(() => window.location.reload(), 400);
+        setTimeout(reloadPanel, 400);
         return;
       }
 
@@ -333,10 +431,94 @@ function downloadUpdate(info) {
       statusEl.textContent = `Updated to v${info.version}. New logic is active.`;
       document.getElementById('update-banner').style.display = 'none';
       updateBtn.disabled = false;
+      refreshRollbackVisibility();
     });
   }
 
   downloadNext(0);
+}
+
+function rollbackUpdate() {
+  const backup = readBackup();
+  if (!backup) return;
+
+  const statusEl = document.getElementById('update-status');
+  const rollbackBtn = document.getElementById('rollback-btn'); // may be null on a stale panel; guarded below
+  if (rollbackBtn) rollbackBtn.disabled = true;
+  statusEl.textContent = `Rolling back to v${backup.version}…`;
+
+  const keys = Object.keys(backup.files).filter((k) => UPDATE_FILE_TARGETS[k]);
+
+  try {
+    keys.forEach((key) => {
+      const destPath = UPDATE_FILE_TARGETS[key];
+      const srcPath = backup.files[key];
+      fs.mkdirSync(path.dirname(destPath), { recursive: true });
+      fs.copyFileSync(srcPath, destPath);
+    });
+  } catch (e) {
+    statusEl.textContent = 'Rollback failed: could not write files (' + e.message + ')';
+    if (rollbackBtn) rollbackBtn.disabled = false;
+    console.error('Rollback failed:', e);
+    return;
+  }
+
+  writeInstalledPackageVersion(backup.version);
+  installedPackageVersion = backup.version;
+  clearBackup(); // a rollback isn't itself a rollback point
+
+  const uiFilesChanged = keys.some((k) => k !== 'jsx');
+  const finish = () => {
+    statusEl.textContent = `Rolled back to v${backup.version}.`;
+    document.getElementById('current-version').textContent = backup.version;
+    if (rollbackBtn) rollbackBtn.style.display = 'none';
+  };
+
+  if (keys.includes('jsx')) {
+    const reloadCall = `$.evalFile("${HOSTSCRIPT_PATH.replace(/\\/g, '/')}")`;
+    window.__adobe_cep__.evalScript(reloadCall, (result) => {
+      if (result && /^Error/i.test(String(result))) {
+        statusEl.textContent = 'Rollback wrote files but the restored hostscript.jsx failed to load: ' + result;
+        if (rollbackBtn) rollbackBtn.disabled = false;
+        return;
+      }
+      if (uiFilesChanged) {
+        statusEl.textContent = `Rolled back to v${backup.version}. Reloading panel…`;
+        setTimeout(reloadPanel, 400);
+      } else {
+        finish();
+      }
+    });
+    return;
+  }
+
+  if (uiFilesChanged) {
+    statusEl.textContent = `Rolled back to v${backup.version}. Reloading panel…`;
+    setTimeout(reloadPanel, 400);
+    return;
+  }
+
+  finish();
+}
+
+// Shows the "Roll back" control only when there's actually a backup on disk
+// to roll back to (e.g. not on a fresh install, and not after a prior
+// rollback already consumed it).
+function refreshRollbackVisibility() {
+  const rollbackBtn = document.getElementById('rollback-btn');
+  if (!rollbackBtn) {
+    console.log('[Project Auditor] #rollback-btn not found in the DOM — index.html on disk may predate this feature, or this page is running a cached copy.');
+    return;
+  }
+  const backup = readBackup();
+  if (backup) {
+    console.log('[Project Auditor] Showing rollback button for v' + backup.version);
+    rollbackBtn.textContent = `Roll back to v${backup.version}`;
+    rollbackBtn.style.display = 'inline';
+    rollbackBtn.disabled = false;
+  } else {
+    rollbackBtn.style.display = 'none';
+  }
 }
 
 /* ---------------- Bridge to ExtendScript ---------------- */
@@ -393,7 +575,7 @@ const greetings = [
   "Hôm nay có thể là ngày không có bug. Cứ hy vọng! 🤞",
   "Project sạch, tâm trí sạch, sáng tạo bay cao! 🧠",
   "Keyframe đúng chỗ, deadline cũng đừng lo! ⏱️",
-  "Một ngày mới, một cơ hội để project hoàn hảo hơn! 🌈",
+  "Một ng  y mới, một cơ hội để project hoàn hảo hơn! 🌈",
   "Coffee + After Effects = Công thức thành công ☕🎬",
   "Không có gì sai cả, chỉ là chưa tới lúc thôi 😄",
   "Chúc bạn render nhanh, export gọn, khách hàng vui! 📦",
@@ -641,7 +823,21 @@ document.getElementById('btn-cm').addEventListener('click', runCM);
 
 cbIncludeLocked.addEventListener('change', rerunLastSearch);
 
+// Guarded: if an update ever patches main.js without also patching
+// index.html (the updater allows patching any subset of files), the old
+// panel markup on disk won't have this button yet. Without this check,
+// getElementById would return null and .addEventListener would throw,
+// which — since this runs before render()/checkForUpdate() below — would
+// silently kill the rest of init and leave the whole panel blank.
+const rollbackBtnEl = document.getElementById('rollback-btn');
+if (rollbackBtnEl) {
+  rollbackBtnEl.addEventListener('click', () => {
+    if (confirm('Roll back to the previous version? This undoes the last update.')) rollbackUpdate();
+  });
+}
+
 /* ---------------- Init ---------------- */
 
 render();
 checkForUpdate();
+refreshRollbackVisibility();
