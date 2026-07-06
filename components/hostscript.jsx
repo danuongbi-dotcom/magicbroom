@@ -76,6 +76,31 @@ function checkIsTrackMatte(lyr, cp) {
     return false;
 }
 
+// Returns the list of {index, comp} pairs to search over. When
+// activeCompOnly is true, this is just the comp currently open/active in
+// the Composition panel (empty list if there isn't one); otherwise it's
+// every comp in the project, same as the original unscoped behavior.
+function getScopedComps(activeCompOnly) {
+    var list = [];
+    if (activeCompOnly) {
+        var active = app.project.activeItem;
+        if (active && active instanceof CompItem) {
+            for (var idx = 1; idx <= app.project.numItems; idx++) {
+                if (app.project.item(idx) === active) {
+                    list.push({ index: idx, comp: active });
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+    for (var i = 1; i <= app.project.numItems; i++) {
+        var item = app.project.item(i);
+        if (item instanceof CompItem) list.push({ index: i, comp: item });
+    }
+    return list;
+}
+
 /* ---------------- Search ---------------- */
 
 function findCompsWithSpaces() {
@@ -116,35 +141,38 @@ function fixSpaces() {
 function findHiddenLayers(includeOpts) {
     var out = [];
     try {
-        for (var i = 1; i <= app.project.numItems; i++) {
-            var comp = app.project.item(i);
-            if (comp instanceof CompItem) {
-                for (var j = 1; j <= comp.numLayers; j++) {
-                    var layer = comp.layer(j);
-                    var isMatte = layer.isTrackMatte || checkIsTrackMatte(layer, comp);
-                    if (!layer.enabled && !isMatte) {
-                        if (!includeOpts.locked && layer.locked) continue;
-                        if (!includeOpts.guide && layer.guideLayer) continue;
-                        var status = layer.locked ? "HIDDEN (LOCKED)" : "HIDDEN";
-                        if (layer.guideLayer) status += " (GUIDE)";
-                        out.push({
-                            compIndex: i,
-                            layerIndex: j,
-                            label: comp.name + " > " + layer.name + " [" + j + "]",
-                            status: status
-                        });
-                    } else if (!layer.enabled && isMatte && includeOpts.matte) {
-                        if (!includeOpts.locked && layer.locked) continue;
-                        if (!includeOpts.guide && layer.guideLayer) continue;
-                        var mStatus = layer.locked ? "HIDDEN (LOCKED, MATTE)" : "HIDDEN (MATTE)";
-                        if (layer.guideLayer) mStatus += " (GUIDE)";
-                        out.push({
-                            compIndex: i,
-                            layerIndex: j,
-                            label: comp.name + " > " + layer.name + " [" + j + "]",
-                            status: mStatus
-                        });
-                    }
+        var scoped = getScopedComps(includeOpts.activeCompOnly);
+        if (includeOpts.activeCompOnly && scoped.length === 0) {
+            return JSON.stringify({ error: "No comp is currently active. Open a comp to search 'In this comp'." });
+        }
+        for (var s = 0; s < scoped.length; s++) {
+            var i = scoped[s].index;
+            var comp = scoped[s].comp;
+            for (var j = 1; j <= comp.numLayers; j++) {
+                var layer = comp.layer(j);
+                var isMatte = layer.isTrackMatte || checkIsTrackMatte(layer, comp);
+                if (!layer.enabled && !isMatte) {
+                    if (!includeOpts.locked && layer.locked) continue;
+                    if (!includeOpts.guide && layer.guideLayer) continue;
+                    var status = layer.locked ? "HIDDEN (LOCKED)" : "HIDDEN";
+                    if (layer.guideLayer) status += " (GUIDE)";
+                    out.push({
+                        compIndex: i,
+                        layerIndex: j,
+                        label: comp.name + " > " + layer.name + " [" + j + "]",
+                        status: status
+                    });
+                } else if (!layer.enabled && isMatte && includeOpts.matte) {
+                    if (!includeOpts.locked && layer.locked) continue;
+                    if (!includeOpts.guide && layer.guideLayer) continue;
+                    var mStatus = layer.locked ? "HIDDEN (LOCKED, MATTE)" : "HIDDEN (MATTE)";
+                    if (layer.guideLayer) mStatus += " (GUIDE)";
+                    out.push({
+                        compIndex: i,
+                        layerIndex: j,
+                        label: comp.name + " > " + layer.name + " [" + j + "]",
+                        status: mStatus
+                    });
                 }
             }
         }
@@ -157,32 +185,35 @@ function findHiddenLayers(includeOpts) {
 function findHiddenEffects(includeOpts) {
     var out = [];
     try {
-        for (var i = 1; i <= app.project.numItems; i++) {
-            var comp = app.project.item(i);
-            if (comp instanceof CompItem) {
-                for (var j = 1; j <= comp.numLayers; j++) {
-                    var layer = comp.layer(j);
-                    if (!includeOpts.locked && layer.locked) continue;
-                    if (!includeOpts.guide && layer.guideLayer) continue;
-                    if (!includeOpts.matte && (layer.isTrackMatte || checkIsTrackMatte(layer, comp))) continue;
-                    var fxGroup = null;
-                    try { fxGroup = layer("Effects"); } catch (eFx) { fxGroup = null; }
-                    if (fxGroup) {
-                        for (var k = 1; k <= fxGroup.numProperties; k++) {
-                            var fx = fxGroup.property(k);
-                            if (!fx.enabled) {
-                                var status = layer.enabled ? "DISABLED FX" : "ON HIDDEN";
-                                if (layer.locked) status += " (LOCKED)";
-                                if (layer.guideLayer) status += " (GUIDE)";
-                                if (layer.isTrackMatte || checkIsTrackMatte(layer, comp)) status += " (MATTE)";
-                                out.push({
-                                    compIndex: i,
-                                    layerIndex: j,
-                                    fxIndex: k,
-                                    label: comp.name + " > " + layer.name + " [" + j + "] > " + fx.name + " [" + k + "]",
-                                    status: status
-                                });
-                            }
+        var scoped = getScopedComps(includeOpts.activeCompOnly);
+        if (includeOpts.activeCompOnly && scoped.length === 0) {
+            return JSON.stringify({ error: "No comp is currently active. Open a comp to search 'In this comp'." });
+        }
+        for (var s = 0; s < scoped.length; s++) {
+            var i = scoped[s].index;
+            var comp = scoped[s].comp;
+            for (var j = 1; j <= comp.numLayers; j++) {
+                var layer = comp.layer(j);
+                if (!includeOpts.locked && layer.locked) continue;
+                if (!includeOpts.guide && layer.guideLayer) continue;
+                if (!includeOpts.matte && (layer.isTrackMatte || checkIsTrackMatte(layer, comp))) continue;
+                var fxGroup = null;
+                try { fxGroup = layer("Effects"); } catch (eFx) { fxGroup = null; }
+                if (fxGroup) {
+                    for (var k = 1; k <= fxGroup.numProperties; k++) {
+                        var fx = fxGroup.property(k);
+                        if (!fx.enabled) {
+                            var status = layer.enabled ? "DISABLED FX" : "ON HIDDEN";
+                            if (layer.locked) status += " (LOCKED)";
+                            if (layer.guideLayer) status += " (GUIDE)";
+                            if (layer.isTrackMatte || checkIsTrackMatte(layer, comp)) status += " (MATTE)";
+                            out.push({
+                                compIndex: i,
+                                layerIndex: j,
+                                fxIndex: k,
+                                label: comp.name + " > " + layer.name + " [" + j + "] > " + fx.name + " [" + k + "]",
+                                status: status
+                            });
                         }
                     }
                 }
@@ -198,31 +229,34 @@ function searchEffectsByName(searchStr, includeOpts) {
     var out = [];
     var needle = String(searchStr).toLowerCase();
     try {
-        for (var i = 1; i <= app.project.numItems; i++) {
-            var comp = app.project.item(i);
-            if (comp instanceof CompItem) {
-                for (var j = 1; j <= comp.numLayers; j++) {
-                    var layer = comp.layer(j);
-                    if (!includeOpts.locked && layer.locked) continue;
-                    if (!includeOpts.guide && layer.guideLayer) continue;
-                    if (!includeOpts.matte && (layer.isTrackMatte || checkIsTrackMatte(layer, comp))) continue;
-                    var fxGroup = null;
-                    try { fxGroup = layer("Effects"); } catch (eFx) { fxGroup = null; }
-                    if (fxGroup) {
-                        for (var k = 1; k <= fxGroup.numProperties; k++) {
-                            var fx = fxGroup.property(k);
-                            if (fx.name.toLowerCase().indexOf(needle) !== -1) {
-                                var status = layer.locked ? "FOUND (LOCKED)" : "FOUND";
-                                if (layer.guideLayer) status += " (GUIDE)";
-                                if (layer.isTrackMatte || checkIsTrackMatte(layer, comp)) status += " (MATTE)";
-                                out.push({
-                                    compIndex: i,
-                                    layerIndex: j,
-                                    fxIndex: k,
-                                    label: comp.name + " > " + layer.name + " [" + j + "] > " + fx.name + " [" + k + "]",
-                                    status: status
-                                });
-                            }
+        var scoped = getScopedComps(includeOpts.activeCompOnly);
+        if (includeOpts.activeCompOnly && scoped.length === 0) {
+            return JSON.stringify({ error: "No comp is currently active. Open a comp to search 'In this comp'." });
+        }
+        for (var s = 0; s < scoped.length; s++) {
+            var i = scoped[s].index;
+            var comp = scoped[s].comp;
+            for (var j = 1; j <= comp.numLayers; j++) {
+                var layer = comp.layer(j);
+                if (!includeOpts.locked && layer.locked) continue;
+                if (!includeOpts.guide && layer.guideLayer) continue;
+                if (!includeOpts.matte && (layer.isTrackMatte || checkIsTrackMatte(layer, comp))) continue;
+                var fxGroup = null;
+                try { fxGroup = layer("Effects"); } catch (eFx) { fxGroup = null; }
+                if (fxGroup) {
+                    for (var k = 1; k <= fxGroup.numProperties; k++) {
+                        var fx = fxGroup.property(k);
+                        if (fx.name.toLowerCase().indexOf(needle) !== -1) {
+                            var status = layer.locked ? "FOUND (LOCKED)" : "FOUND";
+                            if (layer.guideLayer) status += " (GUIDE)";
+                            if (layer.isTrackMatte || checkIsTrackMatte(layer, comp)) status += " (MATTE)";
+                            out.push({
+                                compIndex: i,
+                                layerIndex: j,
+                                fxIndex: k,
+                                label: comp.name + " > " + layer.name + " [" + j + "] > " + fx.name + " [" + k + "]",
+                                status: status
+                            });
                         }
                     }
                 }
@@ -459,35 +493,32 @@ function deleteAllByMode(mode, includeOpts, searchStr) {
     // control what's shown in the list, matching the original script's
     // behavior of never touching locked layers automatically.
     var deleted = 0;
+    var scopedAll = getScopedComps(includeOpts && includeOpts.activeCompOnly);
     app.beginUndoGroup("Audit Delete All");
     try {
         if (mode === "hiddenLayers") {
-            for (var a = 1; a <= app.project.numItems; a++) {
-                var compL = app.project.item(a);
-                if (compL instanceof CompItem) {
-                    for (var b = compL.numLayers; b >= 1; b--) {
-                        var lyr = compL.layer(b);
-                        if (!lyr.enabled && !lyr.locked && !checkIsTrackMatte(lyr, compL)) {
-                            lyr.remove();
-                            deleted++;
-                        }
+            for (var a = 0; a < scopedAll.length; a++) {
+                var compL = scopedAll[a].comp;
+                for (var b = compL.numLayers; b >= 1; b--) {
+                    var lyr = compL.layer(b);
+                    if (!lyr.enabled && !lyr.locked && !checkIsTrackMatte(lyr, compL)) {
+                        lyr.remove();
+                        deleted++;
                     }
                 }
             }
         } else if (mode === "hiddenFX") {
-            for (var c = 1; c <= app.project.numItems; c++) {
-                var compF = app.project.item(c);
-                if (compF instanceof CompItem) {
-                    for (var d = 1; d <= compF.numLayers; d++) {
-                        var lyrF = compF.layer(d);
-                        if (lyrF.locked) continue;
-                        var fxG = lyrF("Effects");
-                        if (fxG) {
-                            for (var e = fxG.numProperties; e >= 1; e--) {
-                                if (!fxG.property(e).enabled) {
-                                    fxG.property(e).remove();
-                                    deleted++;
-                                }
+            for (var c = 0; c < scopedAll.length; c++) {
+                var compF = scopedAll[c].comp;
+                for (var d = 1; d <= compF.numLayers; d++) {
+                    var lyrF = compF.layer(d);
+                    if (lyrF.locked) continue;
+                    var fxG = lyrF("Effects");
+                    if (fxG) {
+                        for (var e = fxG.numProperties; e >= 1; e--) {
+                            if (!fxG.property(e).enabled) {
+                                fxG.property(e).remove();
+                                deleted++;
                             }
                         }
                     }
@@ -496,19 +527,17 @@ function deleteAllByMode(mode, includeOpts, searchStr) {
         } else if (mode === "searchFX") {
             var needle = String(searchStr).toLowerCase();
             if (needle !== "") {
-                for (var f = 1; f <= app.project.numItems; f++) {
-                    var compS = app.project.item(f);
-                    if (compS instanceof CompItem) {
-                        for (var g = 1; g <= compS.numLayers; g++) {
-                            var lyrS = compS.layer(g);
-                            if (lyrS.locked) continue;
-                            var fxGS = lyrS("Effects");
-                            if (fxGS) {
-                                for (var h = fxGS.numProperties; h >= 1; h--) {
-                                    if (fxGS.property(h).name.toLowerCase().indexOf(needle) !== -1) {
-                                        fxGS.property(h).remove();
-                                        deleted++;
-                                    }
+                for (var f = 0; f < scopedAll.length; f++) {
+                    var compS = scopedAll[f].comp;
+                    for (var g = 1; g <= compS.numLayers; g++) {
+                        var lyrS = compS.layer(g);
+                        if (lyrS.locked) continue;
+                        var fxGS = lyrS("Effects");
+                        if (fxGS) {
+                            for (var h = fxGS.numProperties; h >= 1; h--) {
+                                if (fxGS.property(h).name.toLowerCase().indexOf(needle) !== -1) {
+                                    fxGS.property(h).remove();
+                                    deleted++;
                                 }
                             }
                         }
