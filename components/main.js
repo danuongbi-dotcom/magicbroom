@@ -575,7 +575,7 @@ const greetings = [
   "Hôm nay có thể là ngày không có bug. Cứ hy vọng! 🤞",
   "Project sạch, tâm trí sạch, sáng tạo bay cao! 🧠",
   "Keyframe đúng chỗ, deadline cũng đừng lo! ⏱️",
-  "Một ng  y mới, một cơ hội để project hoàn hảo hơn! 🌈",
+  "Một ngày mới, một cơ hội để project hoàn hảo hơn! 🌈",
   "Coffee + After Effects = Công thức thành công ☕🎬",
   "Không có gì sai cả, chỉ là chưa tới lúc thôi 😄",
   "Chúc bạn render nhanh, export gọn, khách hàng vui! 📦",
@@ -593,7 +593,23 @@ const resultTable = document.querySelector('.result-table');
 const greetingEl = document.getElementById('greeting');
 const counterLabel = document.getElementById('counter-label');
 const cbIncludeLocked = document.getElementById('cb-include-locked');
+const cbIncludeMatte = document.getElementById('cb-include-matte');
+const cbIncludeGuide = document.getElementById('cb-include-guide');
+const filterDropdown = document.getElementById('filter-dropdown');
+const filterToggleBtn = document.getElementById('filter-toggle-btn');
+const filterMenu = document.getElementById('filter-menu');
 const searchInput = document.getElementById('search-input');
+
+// Bundles the three include/exclude checkboxes into one object that's
+// passed straight through to hostscript.jsx in place of the old lone
+// `includeLocked` boolean.
+function getIncludeOpts() {
+  return {
+    locked: cbIncludeLocked.checked,
+    matte: cbIncludeMatte.checked,
+    guide: cbIncludeGuide.checked
+  };
+}
 
 /* ---------------- Rendering ---------------- */
 
@@ -702,7 +718,7 @@ function runFixSpace() {
 
 function runFindHidden() {
   lastSearchMode = 'hiddenLayers';
-  callJSX('findHiddenLayers', [cbIncludeLocked.checked]).then((json) => {
+  callJSX('findHiddenLayers', [getIncludeOpts()]).then((json) => {
     try {
       currentResults = parseSearchResult(json);
       lastError = null;
@@ -717,7 +733,7 @@ function runFindHidden() {
 
 function runFindEffects() {
   lastSearchMode = 'hiddenFX';
-  callJSX('findHiddenEffects', [cbIncludeLocked.checked]).then((json) => {
+  callJSX('findHiddenEffects', [getIncludeOpts()]).then((json) => {
     try {
       currentResults = parseSearchResult(json);
       lastError = null;
@@ -735,7 +751,7 @@ function runFindEffName() {
   lastSearchMode = 'searchFX';
   const term = searchInput.value.trim();
   if (term === '') return;
-  callJSX('searchEffectsByName', [term, cbIncludeLocked.checked]).then((json) => {
+  callJSX('searchEffectsByName', [term, getIncludeOpts()]).then((json) => {
     try {
       currentResults = parseSearchResult(json);
       lastError = null;
@@ -752,7 +768,7 @@ function rerunLastSearch() {
   if (lastSearchMode === 'hiddenLayers') runFindHidden();
   else if (lastSearchMode === 'hiddenFX') runFindEffects();
   else if (lastSearchMode === 'searchFX') runFindEffName();
-  // 'space', 'dupeNames' and '' are unaffected by the locked-layer filter, same as the original
+  // 'space', 'dupeNames' and '' are unaffected by the include filters, same as the original
 }
 
 /* ---------------- Delete actions ---------------- */
@@ -767,7 +783,7 @@ function runDeleteSelected() {
 
 function runDeleteAll() {
   const term = lastSearchMode === 'searchFX' ? searchInput.value.trim() : '';
-  callJSX('deleteAllByMode', [lastSearchMode, cbIncludeLocked.checked, term]).then(() => {
+  callJSX('deleteAllByMode', [lastSearchMode, getIncludeOpts(), term]).then(() => {
     refreshAfterDelete();
   });
 }
@@ -822,6 +838,25 @@ document.getElementById('btn-del-all').addEventListener('click', runDeleteAll);
 document.getElementById('btn-cm').addEventListener('click', runCM);
 
 cbIncludeLocked.addEventListener('change', rerunLastSearch);
+cbIncludeMatte.addEventListener('change', rerunLastSearch);
+cbIncludeGuide.addEventListener('change', rerunLastSearch);
+
+// Dropdown open/close: toggle on button click, close on outside click,
+// and don't let clicks inside the menu (e.g. on the checkboxes/labels)
+// bubble up and immediately re-close it.
+filterToggleBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = filterMenu.style.display !== 'none';
+  filterMenu.style.display = isOpen ? 'none' : 'flex';
+  filterToggleBtn.classList.toggle('active', !isOpen);
+});
+
+filterMenu.addEventListener('click', (e) => e.stopPropagation());
+
+document.addEventListener('click', () => {
+  filterMenu.style.display = 'none';
+  filterToggleBtn.classList.remove('active');
+});
 
 // Guarded: if an update ever patches main.js without also patching
 // index.html (the updater allows patching any subset of files), the old
