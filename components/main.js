@@ -611,6 +611,14 @@ function getIncludeOpts() {
   };
 }
 
+// Keeps the "Include (x)" button label in sync with how many of the
+// three filter checkboxes are currently ticked.
+function updateFilterLabel() {
+  const count = [cbIncludeLocked, cbIncludeMatte, cbIncludeGuide]
+    .filter((cb) => cb.checked).length;
+  filterToggleBtn.textContent = `Include (${count}) ▾`;
+}
+
 /* ---------------- Rendering ---------------- */
 
 function render() {
@@ -837,9 +845,9 @@ document.getElementById('btn-del-sel').addEventListener('click', runDeleteSelect
 document.getElementById('btn-del-all').addEventListener('click', runDeleteAll);
 document.getElementById('btn-cm').addEventListener('click', runCM);
 
-cbIncludeLocked.addEventListener('change', rerunLastSearch);
-cbIncludeMatte.addEventListener('change', rerunLastSearch);
-cbIncludeGuide.addEventListener('change', rerunLastSearch);
+cbIncludeLocked.addEventListener('change', () => { updateFilterLabel(); rerunLastSearch(); });
+cbIncludeMatte.addEventListener('change', () => { updateFilterLabel(); rerunLastSearch(); });
+cbIncludeGuide.addEventListener('change', () => { updateFilterLabel(); rerunLastSearch(); });
 
 // Dropdown open/close: toggle on button click, close on outside click,
 // and don't let clicks inside the menu (e.g. on the checkboxes/labels)
@@ -873,6 +881,7 @@ if (rollbackBtnEl) {
 
 /* ---------------- Init ---------------- */
 
+updateFilterLabel();
 render();
 checkForUpdate();
 refreshRollbackVisibility();
