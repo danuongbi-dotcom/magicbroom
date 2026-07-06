@@ -1,6 +1,6 @@
 {
-  "version": "2.1.0",
-  "notes": "Thêm chức năng roll back sau update",
+  "version": "2.2.0",
+  "notes": "Thêm filter hidden layer: guide, matte",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
