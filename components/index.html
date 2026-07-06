@@ -40,21 +40,27 @@
 
     <div class="row info-row">
       <span id="counter-label">Total items: 0  |  Double-click to jump to item  |  Hold Ctrl/Shift to select multiple items</span>
-      <div class="filter-dropdown" id="filter-dropdown">
-        <button type="button" id="filter-toggle-btn" class="filter-toggle-btn">Include (0) ▾</button>
-        <div id="filter-menu" class="filter-menu" style="display:none;">
-          <label class="checkbox-label">
-            <input id="cb-include-locked" type="checkbox" />
-            Locked layers
-          </label>
-          <label class="checkbox-label">
-            <input id="cb-include-matte" type="checkbox" />
-            Matte layers
-          </label>
-          <label class="checkbox-label">
-            <input id="cb-include-guide" type="checkbox" />
-            Guide layers
-          </label>
+      <div class="info-row-right">
+        <label class="checkbox-label">
+          <input id="cb-scope-comp" type="checkbox" />
+          In this comp
+        </label>
+        <div class="filter-dropdown" id="filter-dropdown">
+          <button type="button" id="filter-toggle-btn" class="filter-toggle-btn">Include (0) ▾</button>
+          <div id="filter-menu" class="filter-menu" style="display:none;">
+            <label class="checkbox-label">
+              <input id="cb-include-locked" type="checkbox" />
+              Locked layers
+            </label>
+            <label class="checkbox-label">
+              <input id="cb-include-matte" type="checkbox" />
+              Matte layers
+            </label>
+            <label class="checkbox-label">
+              <input id="cb-include-guide" type="checkbox" />
+              Guide layers
+            </label>
+          </div>
         </div>
       </div>
     </div>
