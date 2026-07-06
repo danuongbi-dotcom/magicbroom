@@ -1,6 +1,6 @@
 {
-  "version": "2.2.3",
-  "notes": "Thêm filter hidden layer: guide, matte",
+  "version": "2.3.0",
+  "notes": "Thêm filter hidden layer: guide, matte. Thêm filter chỉ hiện ở comp hiện tại",
   "files": {
     "jsx": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/hostscript.jsx",
     "mainJs": "https://raw.githubusercontent.com/danuongbi-dotcom/magicbroom/refs/heads/main/components/main.js",
