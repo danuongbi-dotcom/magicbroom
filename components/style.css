@@ -181,6 +181,51 @@ button:hover {
   cursor: pointer;
 }
 
+.filter-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.filter-toggle-btn {
+  background: #2c2c2c;
+  color: #cfcfcf;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.filter-toggle-btn:hover {
+  background: #3a3a3a;
+}
+
+.filter-toggle-btn.active {
+  background: #3a5a8a;
+  border-color: #3a5a8a;
+  color: #fff;
+}
+
+.filter-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  background: #262626;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.filter-menu .checkbox-label {
+  font-size: 11px;
+}
+
 .action-buttons-row {
   gap: 9px;
 }
