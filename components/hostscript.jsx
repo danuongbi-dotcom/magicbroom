@@ -113,7 +113,7 @@ function fixSpaces() {
     return JSON.stringify({ fixCount: fixCount });
 }
 
-function findHiddenLayers(includeLocked) {
+function findHiddenLayers(includeOpts) {
     var out = [];
     try {
         for (var i = 1; i <= app.project.numItems; i++) {
@@ -121,8 +121,10 @@ function findHiddenLayers(includeLocked) {
             if (comp instanceof CompItem) {
                 for (var j = 1; j <= comp.numLayers; j++) {
                     var layer = comp.layer(j);
-                    if (!layer.enabled && !layer.isTrackMatte && !checkIsTrackMatte(layer, comp)) {
-                        if (!includeLocked && layer.locked) continue;
+                    var isMatte = layer.isTrackMatte || checkIsTrackMatte(layer, comp);
+                    if (!layer.enabled && !isMatte) {
+                        if (!includeOpts.locked && layer.locked) continue;
+                        if (!includeOpts.guide && layer.guideLayer) continue;
                         var status = layer.locked ? "HIDDEN (LOCKED)" : "HIDDEN";
                         if (layer.guideLayer) status += " (GUIDE)";
                         out.push({
@@ -130,6 +132,17 @@ function findHiddenLayers(includeLocked) {
                             layerIndex: j,
                             label: comp.name + " > " + layer.name + " [" + j + "]",
                             status: status
+                        });
+                    } else if (!layer.enabled && isMatte && includeOpts.matte) {
+                        if (!includeOpts.locked && layer.locked) continue;
+                        if (!includeOpts.guide && layer.guideLayer) continue;
+                        var mStatus = layer.locked ? "HIDDEN (LOCKED, MATTE)" : "HIDDEN (MATTE)";
+                        if (layer.guideLayer) mStatus += " (GUIDE)";
+                        out.push({
+                            compIndex: i,
+                            layerIndex: j,
+                            label: comp.name + " > " + layer.name + " [" + j + "]",
+                            status: mStatus
                         });
                     }
                 }
@@ -141,7 +154,7 @@ function findHiddenLayers(includeLocked) {
     return JSON.stringify(out);
 }
 
-function findHiddenEffects(includeLocked) {
+function findHiddenEffects(includeOpts) {
     var out = [];
     try {
         for (var i = 1; i <= app.project.numItems; i++) {
@@ -149,7 +162,9 @@ function findHiddenEffects(includeLocked) {
             if (comp instanceof CompItem) {
                 for (var j = 1; j <= comp.numLayers; j++) {
                     var layer = comp.layer(j);
-                    if (!includeLocked && layer.locked) continue;
+                    if (!includeOpts.locked && layer.locked) continue;
+                    if (!includeOpts.guide && layer.guideLayer) continue;
+                    if (!includeOpts.matte && (layer.isTrackMatte || checkIsTrackMatte(layer, comp))) continue;
                     var fxGroup = null;
                     try { fxGroup = layer("Effects"); } catch (eFx) { fxGroup = null; }
                     if (fxGroup) {
@@ -159,6 +174,7 @@ function findHiddenEffects(includeLocked) {
                                 var status = layer.enabled ? "DISABLED FX" : "ON HIDDEN";
                                 if (layer.locked) status += " (LOCKED)";
                                 if (layer.guideLayer) status += " (GUIDE)";
+                                if (layer.isTrackMatte || checkIsTrackMatte(layer, comp)) status += " (MATTE)";
                                 out.push({
                                     compIndex: i,
                                     layerIndex: j,
@@ -178,7 +194,7 @@ function findHiddenEffects(includeLocked) {
     return JSON.stringify(out);
 }
 
-function searchEffectsByName(searchStr, includeLocked) {
+function searchEffectsByName(searchStr, includeOpts) {
     var out = [];
     var needle = String(searchStr).toLowerCase();
     try {
@@ -187,7 +203,9 @@ function searchEffectsByName(searchStr, includeLocked) {
             if (comp instanceof CompItem) {
                 for (var j = 1; j <= comp.numLayers; j++) {
                     var layer = comp.layer(j);
-                    if (!includeLocked && layer.locked) continue;
+                    if (!includeOpts.locked && layer.locked) continue;
+                    if (!includeOpts.guide && layer.guideLayer) continue;
+                    if (!includeOpts.matte && (layer.isTrackMatte || checkIsTrackMatte(layer, comp))) continue;
                     var fxGroup = null;
                     try { fxGroup = layer("Effects"); } catch (eFx) { fxGroup = null; }
                     if (fxGroup) {
@@ -196,6 +214,7 @@ function searchEffectsByName(searchStr, includeLocked) {
                             if (fx.name.toLowerCase().indexOf(needle) !== -1) {
                                 var status = layer.locked ? "FOUND (LOCKED)" : "FOUND";
                                 if (layer.guideLayer) status += " (GUIDE)";
+                                if (layer.isTrackMatte || checkIsTrackMatte(layer, comp)) status += " (MATTE)";
                                 out.push({
                                     compIndex: i,
                                     layerIndex: j,
@@ -434,10 +453,11 @@ function deleteSelected(mode, refsJson) {
     return JSON.stringify({ deleted: deleted });
 }
 
-function deleteAllByMode(mode, includeLocked, searchStr) {
-    // Note: locked layers/effects are never deleted here regardless of
-    // includeLocked — that flag only controls what's shown in the list,
-    // matching the original script's behavior.
+function deleteAllByMode(mode, includeOpts, searchStr) {
+    // Note: locked layers/effects (and matte layers, in hiddenLayers mode)
+    // are never deleted here regardless of includeOpts — those flags only
+    // control what's shown in the list, matching the original script's
+    // behavior of never touching locked layers automatically.
     var deleted = 0;
     app.beginUndoGroup("Audit Delete All");
     try {
