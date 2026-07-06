@@ -595,19 +595,21 @@ const counterLabel = document.getElementById('counter-label');
 const cbIncludeLocked = document.getElementById('cb-include-locked');
 const cbIncludeMatte = document.getElementById('cb-include-matte');
 const cbIncludeGuide = document.getElementById('cb-include-guide');
+const cbScopeComp = document.getElementById('cb-scope-comp');
 const filterDropdown = document.getElementById('filter-dropdown');
 const filterToggleBtn = document.getElementById('filter-toggle-btn');
 const filterMenu = document.getElementById('filter-menu');
 const searchInput = document.getElementById('search-input');
 
-// Bundles the three include/exclude checkboxes into one object that's
-// passed straight through to hostscript.jsx in place of the old lone
-// `includeLocked` boolean.
+// Bundles the three include/exclude checkboxes plus the "In this comp"
+// scope toggle into one object that's passed straight through to
+// hostscript.jsx in place of the old lone `includeLocked` boolean.
 function getIncludeOpts() {
   return {
     locked: cbIncludeLocked.checked,
     matte: cbIncludeMatte.checked,
-    guide: cbIncludeGuide.checked
+    guide: cbIncludeGuide.checked,
+    activeCompOnly: cbScopeComp.checked
   };
 }
 
@@ -848,6 +850,7 @@ document.getElementById('btn-cm').addEventListener('click', runCM);
 cbIncludeLocked.addEventListener('change', () => { updateFilterLabel(); rerunLastSearch(); });
 cbIncludeMatte.addEventListener('change', () => { updateFilterLabel(); rerunLastSearch(); });
 cbIncludeGuide.addEventListener('change', () => { updateFilterLabel(); rerunLastSearch(); });
+cbScopeComp.addEventListener('change', rerunLastSearch);
 
 // Dropdown open/close: toggle on button click, close on outside click,
 // and don't let clicks inside the menu (e.g. on the checkboxes/labels)
